@@ -1,21 +1,28 @@
 
-# Whisper: https://github.com/openai/whisper
+# Faster-Whisper: https://github.com/SYSTRAN/faster-whisper
 # note: If you want to use GPU, You need to install CUDA and PyTorch witch is compatible with CUDA.
 # Check CUDA version: https://pytorch.org/get-started/locally/
-# CUDA download: https://developer.nvidia.com/cuda-toolkit-archive
-import whisper
-from model import Model
 
-from pprint import pprint
-import json
+import os
+from faster_whisper import WhisperModel
+from model import ModelSize
 
-MODEL = Model.BASE
-INPUT_FILE = "sample.mp3"
+MODEL = ModelSize.BASE
+INPUT_FILE = "sample.mp4"
 
-model = whisper.load_model(MODEL.value)
-result = model.transcribe(INPUT_FILE)
-print(result["text"])
+#  Initializing *.dll, but found *.dll already initialized. が出たら必要な環境変数
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+
+model = WhisperModel(MODEL.value, device="cuda", compute_type="float16")
+# model = WhisperModel(MODEL.value, device="cuda", compute_type="int8_float16")
+
+segments, _ = model.transcribe(INPUT_FILE, beam_size=5)
 
 # save to file
-with open("result.json", "w") as f:
-    json.dump(result, f)
+with open("result.out", "w") as f:
+    text = ""
+    for segment in segments:
+        f.write("[%.2fs -> %.2fs] %s\n" %
+                (segment.start, segment.end, segment.text))
+        text += segment.text
+    print(text)
