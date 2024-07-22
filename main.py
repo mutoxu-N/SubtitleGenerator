@@ -32,18 +32,20 @@ print(" -> Elapsed time: "
       + f"{elapsed_h:02d}:{elapsed_m:02d}:{elapsed_s:02d}.{elapsed_ms:03d}\n")
 
 # save to file
-text = ""
+text, out_result = "", ""
 with open("result.srt", "w") as f:
-    write = ""
     for i, segment in enumerate(segments):
-        start_h = int(segment.start) // 3600
-        start_m = int(segment.start) % 3600 // 60
-        start_s = int(segment.start) % 60
+        write = ""
+        start_sec = int(segment.start)
+        start_h = start_sec // 3600
+        start_m = start_sec % 3600 // 60
+        start_s = start_sec % 60
         start_ms = int(segment.start * 1000) % 1000
 
-        end_h = int(segment.end) // 3600
-        end_m = int(segment.end) % 3600 // 60
-        end_s = int(segment.end) % 60
+        end_sec = int(segment.end)
+        end_h = end_sec // 3600
+        end_m = end_sec % 3600 // 60
+        end_s = end_sec % 60
         end_ms = int(segment.end * 1000) % 1000
 
         write += f"{i}\n"
@@ -52,13 +54,12 @@ with open("result.srt", "w") as f:
         write += f"{segment.text}\n"
         write += "\n"
         text += segment.text
-    f.write(write)
+        out_result += f"[{segment.start}s -> {segment.end}s] {segment.text}\n"
+        f.write(write)
 
 with open("result.out", "w") as f:
-    write = text + "\n\n"
-    for segment in segments:
-        write += f"[{segment.start}s -> {segment.end}s] {segment.text}\n"
-    f.write(write)
+    f.write(text + "\n\n")
+    f.write(out_result)
 
 print("All is Done!")
 end_time = time.perf_counter()
