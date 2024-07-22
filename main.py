@@ -5,11 +5,31 @@
 
 import os
 import time
+import tkinter.filedialog as fd
 from faster_whisper import WhisperModel
 from model import ModelSize
 
 MODEL = ModelSize.LARGE_V3
-INPUT_FILE = "sample.mp4"
+
+# config 読み込み
+config = os.path.dirname(os.path.abspath(__file__)) + "/config"
+dir = os.path.dirname(os.path.abspath(__file__))
+if os.path.exists(config):
+    tmp = ""
+    with open(config) as f:
+        tmp = f.read()
+
+    if os.path.exists(tmp):
+        dir = tmp
+
+# ファイル読み込み
+input_file = fd.askopenfile(initialdir=dir).name
+dir = os.path.dirname(os.path.abspath(input_file))
+fname = os.path.splitext(os.path.basename(input_file))[0]
+
+# dir を config に保存
+with open(config, "w") as f:
+    f.write(dir)
 
 #  Initializing *.dll, but found *.dll already initialized. が出ても処理が中断しないようにする環境変数
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
@@ -20,7 +40,7 @@ start_time = time.perf_counter()
 model = WhisperModel(MODEL.value, device="cuda", compute_type="float16")
 # model = WhisperModel(MODEL.value, device="cuda", compute_type="int8_float16")
 
-segments, _ = model.transcribe(INPUT_FILE, beam_size=5)
+segments, _ = model.transcribe(input_file, beam_size=5)
 print("Whisper is Done!")
 end_time = time.perf_counter()
 elapsed = end_time - start_time
@@ -33,7 +53,7 @@ print(" -> Elapsed time: "
 
 # save to file
 text, out_result = "", ""
-with open("result.srt", "w") as f:
+with open(f"{dir}/{fname}.srt", "w") as f:
     for i, segment in enumerate(segments):
         write = ""
         start_sec = int(segment.start)
@@ -57,7 +77,7 @@ with open("result.srt", "w") as f:
         out_result += f"[{segment.start}s -> {segment.end}s] {segment.text}\n"
         f.write(write)
 
-with open("result.out", "w") as f:
+with open(f"{dir}/{fname}.out", "w") as f:
     f.write(text + "\n\n")
     f.write(out_result)
 

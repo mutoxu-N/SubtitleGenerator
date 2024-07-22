@@ -1,7 +1,7 @@
 __pycache__
 .venv
+config
 *.mp3
 *.mp4
-*.json
 *.out
 *.srt
