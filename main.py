@@ -53,7 +53,7 @@ print(" -> Elapsed time: "
 
 # save to file
 text, out_result = "", ""
-with open(f"{dir}/{fname}.srt", "w") as f:
+with open(f"{dir}/{fname}.srt", "w", encoding="utf-8") as f:
     for i, segment in enumerate(segments):
         write = ""
         start_sec = int(segment.start)
@@ -77,7 +77,7 @@ with open(f"{dir}/{fname}.srt", "w") as f:
         out_result += f"[{segment.start}s -> {segment.end}s] {segment.text}\n"
         f.write(write)
 
-with open(f"{dir}/{fname}.out", "w") as f:
+with open(f"{dir}/{fname}.out", "w", encoding="utf-8") as f:
     f.write(text + "\n\n")
     f.write(out_result)
 
